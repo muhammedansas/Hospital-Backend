@@ -4,7 +4,7 @@ from django.contrib.auth.models import BaseUserManager,AbstractBaseUser
 # Create your models here.
 
 class UserManager(BaseUserManager):
-    def create_user(self,first_name,last_name,username,email,is_doctor,password=None,**extra_fields):
+    def create_user(self,first_name,last_name,username,email,is_doctor=False,password=None,**extra_fields):
         if not email:
             raise ValueError("User must have an Email address")
         user = self.model(
@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
             first_name=first_name,
             last_name=last_name,
             username=username,
-            is_doctor = is_doctor
+            is_doctor=is_doctor
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -70,5 +70,4 @@ class Doctors(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='doctors')    
     department = models.CharField(max_length=100,null=True,blank=True)
     hospital = models.CharField(max_length=100,null=True,blank=True)
-
     is_verified = models.BooleanField(default=False)
