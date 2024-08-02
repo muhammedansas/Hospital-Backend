@@ -55,13 +55,12 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         if user.blocked:
             raise AuthenticationFailed("Your accounts is blocked due to some reason, Please contact admin")
-        
         return data
 
 
 class DocterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Doctors  
+        model = Doctors
         fields = ["department","hospital","is_verified"]   
 
 

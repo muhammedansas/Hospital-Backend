@@ -46,5 +46,3 @@ class UserProfile(APIView):
             serializer.save()
             return Response({"Msg":"Profile updated"},serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_502_BAD_GATEWAY)
-    
-    
