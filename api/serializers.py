@@ -64,6 +64,7 @@ class DocterSerializer(serializers.ModelSerializer):
         fields = ["department","hospital","is_verified"]   
 
 
+
 class UserListSerializer(serializers.ModelSerializer):
     doctors = DocterSerializer()
 

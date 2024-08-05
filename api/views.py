@@ -2,8 +2,9 @@ from django.shortcuts import HttpResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
-from . serializers import UserRegisterSerializer,MyTokenObtainPairSerializer,UserListSerializer
+from . serializers import UserRegisterSerializer,MyTokenObtainPairSerializer,UserListSerializer,DocterSerializer
 from . models import User,Doctors
 
 # Create your views here.
@@ -46,3 +47,13 @@ class UserProfile(APIView):
             serializer.save()
             return Response({"Msg":"Profile updated"},serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_502_BAD_GATEWAY)
+
+
+class DoctorsView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
+        print(request.user)
+        print(request.user.is_authenticated)
+        obj = Doctors.objects.all()
+        serializer = DocterSerializer(obj,many=True)
+        return Response(serializer.data)
