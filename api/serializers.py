@@ -58,39 +58,54 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
-class DocterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Doctors
-        fields = ["department","hospital","is_verified"]   
 
-
-
-class UserListSerializer(serializers.ModelSerializer):
-    doctors = DocterSerializer()
-
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name','last_name','email','doctors']
+        fields = ['first_name','last_name','username','email','password','profile_image']
 
-        def update(self,instance,validated_data):
-            instance.first_name = validated_data.get('first_name',instance.first_name)
-            instance.last_name = validated_data.get('last_name',instance.last_name)
-            instance.email = validated_data.get('email',instance.email)
-            instance.username = validated_data.get('username',instance.username)
+  
+class DocterSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Doctors
+        fields = ["user","department","hospital","is_verified","image"]
+  
+    
+    def update(self, instance, validated_data):
 
-            if instance.is_doctor:
-                doctor_profile = validated_data.get('doctors')
-                if doctor_profile:
-                    doctors = Doctors.objects.filter(user = instance)
-                    if doctors.exists():
-                        doctor = doctors.first()
-                        doctor.hospital = doctor_profile.get('hospital',doctor.hospital)
-                        doctor.department = doctor_profile.get('department',doctor.department)
-                        if doctor.hospital is not None and doctor.department is not None:
-                            doctor.is_verified = True
-                        doctor.save()
-                    else:
-                        raise ValidationError("No doctor record found")     
-            instance.save()
-            return instance
+        instance.department = validated_data.get('department',instance.department)
+        instance.hospital = validated_data.get('hospital',instance.hospital)
+        instance.image = validated_data.get('image',instance.image)
+        instance.save()
+        return instance
+
+# class UserListSerializer(serializers.ModelSerializer):
+#     doctors = DocterSerializer()
+
+#     class Meta:
+#         model = User
+#         fields = ['first_name','last_name','email','doctors',]
+
+#         def update(self,instance,validated_data):
+#             instance.first_name = validated_data.get('first_name',instance.first_name)
+#             instance.last_name = validated_data.get('last_name',instance.last_name)
+#             instance.email = validated_data.get('email',instance.email)
+#             instance.username = validated_data.get('username',instance.username)
+
+#             if instance.is_doctor:
+#                 doctor_profile = validated_data.get('doctors')
+#                 if doctor_profile:
+#                     doctors = Doctors.objects.filter(user = instance)
+#                     if doctors.exists():
+#                         doctor = doctors.first()
+#                         doctor.hospital = doctor_profile.get('hospital',doctor.hospital)
+#                         doctor.department = doctor_profile.get('department',doctor.department)
+#                         if doctor.hospital is not None and doctor.department is not None:
+#                             doctor.is_verified = True
+#                         doctor.save()
+#                     else:
+#                         raise ValidationError("No doctor record found")     
+#             instance.save()
+#             return instance
         

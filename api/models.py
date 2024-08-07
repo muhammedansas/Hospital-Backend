@@ -9,7 +9,7 @@ class UserManager(BaseUserManager):
             raise ValueError("User must have an Email address")
         user = self.model(
             email=self.normalize_email(email),
-            first_name = first_name,
+            first_name = first_name,    
             last_name = last_name,
             username = username,
             is_doctor = is_doctor,
@@ -44,6 +44,7 @@ class User(AbstractBaseUser):
     is_doctor = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    profile_image = models.ImageField(upload_to='images/')
 
     objects = UserManager()
 
@@ -67,7 +68,8 @@ class User(AbstractBaseUser):
     
 
 class Doctors(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='doctors')    
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='doctors')    
     department = models.CharField(max_length=100,null=True,blank=True)
     hospital = models.CharField(max_length=100,null=True,blank=True)
+    image = models.ImageField(upload_to='images/',null=True,blank=True)
     is_verified = models.BooleanField(default=False)

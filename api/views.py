@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
-from . serializers import UserRegisterSerializer,MyTokenObtainPairSerializer,UserListSerializer,DocterSerializer
+from . serializers import UserRegisterSerializer,MyTokenObtainPairSerializer,UserSerializer,DocterSerializer
 from . models import User,Doctors
 
 # Create your views here.
@@ -12,6 +12,7 @@ from . models import User,Doctors
 class UserRegistration(APIView):
     def post(self,request):
         serializer = UserRegisterSerializer(data=request.data)
+        print(request.data,"tyuio")
         if serializer.is_valid():
             user=User.objects.create_user(
                 username = serializer.validated_data['username'],
@@ -34,26 +35,61 @@ class UserRegistration(APIView):
 class MytokenObtainPairview(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer 
 
-class UserProfile(APIView):
-    def get(self,request):
-        serializer = UserListSerializer(request.user)
-        return Response(serializer.data,status=status.HTTP_200_OK)
 
+class DoctorList(APIView):
+    # permission_classes = [IsAuthenticated]
+    def get(self,request):
+        obj = Doctors.objects.all()
+        serializer = DocterSerializer(obj,many=True)
+        return Response(serializer.data)
+    
     def patch(self,request):
         user = request.user
         data = request.data
-        serializer = UserListSerializer(user,data=data,partial = True)
+        serializer = UserSerializer(user,data=data,partial = True)
         if serializer.is_valid():
             serializer.save()
             return Response({"Msg":"Profile updated"},serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors,status=status.HTTP_502_BAD_GATEWAY)
+    
+class DoctorProfile(APIView):
+    def get(self, request):
+        user = request.user
+        if user.is_anonymous:
+            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            obj = Doctors.objects.get(user=user)
+            print(obj.department)
+            serializer = DocterSerializer(obj)
+            return Response(serializer.data)
+        except Doctors.DoesNotExist:
+            return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+    def patch(self, request):
+        print(request.data)
+        doctor_data = Doctors.objects.get(user = request.user)
+        serializer = DocterSerializer(doctor_data, data=request.data, partial=True)
+        if serializer.is_valid():
+            print(serializer.validated_data,'././././')
+            serializer.save()
+            
+            return Response({"Msg": "Profile updated"},status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserProfile(APIView):
+    def get(self, request):
+        try:
+            obj = User.objects.get(email=request.user)
+            serializer = UserSerializer(obj)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class DoctorsView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self,request):
-        print(request.user)
-        print(request.user.is_authenticated)
-        obj = Doctors.objects.all()
-        serializer = DocterSerializer(obj,many=True)
-        return Response(serializer.data)
+    def patch(self,request):
+        user = request.user
+        data = request.data
+        serializer = UserSerializer(user,data=data,partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Msg":"Profile updated"})
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
