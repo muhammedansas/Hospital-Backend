@@ -36,6 +36,13 @@ class MytokenObtainPairview(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer 
 
 
+class UsersList(APIView):
+    def get(self,request):
+        obj = User.objects.all()
+        serializer = UserSerializer(obj,many=True)
+        return Response(serializer.data)
+    
+
 class DoctorList(APIView):
     # permission_classes = [IsAuthenticated]
     def get(self,request):
@@ -85,11 +92,14 @@ class UserProfile(APIView):
         except User.DoesNotExist:
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    def patch(self,request):
-        user = request.user
-        data = request.data
-        serializer = UserSerializer(user,data=data,partial = True)
+    def patch(self, request):
+        try:
+            user = User.objects.get(email=request.user.email)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"Msg":"Profile updated"})
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
