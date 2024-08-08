@@ -64,6 +64,17 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['first_name','last_name','username','email','password','profile_image']
 
+    # def update(self, instance, validated_data):
+    #     instance.first_name = validated_data.get('first_name',instance.first_name) 
+    #     instance.last_name = validated_data.get('last_name',instance.last_name)
+    #     instance.username = validated_data.get('username',instance.username)
+    #     instance.email = validated_data.get('email',instance.email)
+    #     instance.profile_image = validated_data.get('profile_image',instance.profile_image)
+
+    #     instance.save()
+
+    #     return instance
+
   
 class DocterSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -73,11 +84,19 @@ class DocterSerializer(serializers.ModelSerializer):
   
     
     def update(self, instance, validated_data):
+        # user_data = validated_data.pop('user',None)
 
         instance.department = validated_data.get('department',instance.department)
         instance.hospital = validated_data.get('hospital',instance.hospital)
         instance.image = validated_data.get('image',instance.image)
         instance.save()
+
+        # if user_data:
+        #     user = instance.user
+        #     user.username = user_data.get('username',user.username)
+        #     user.email = user_data.get('email',user.email)
+        #     user.save()
+
         return instance
 
 # class UserListSerializer(serializers.ModelSerializer):

@@ -44,7 +44,7 @@ class User(AbstractBaseUser):
     is_doctor = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    profile_image = models.ImageField(upload_to='images/')
+    profile_image = models.ImageField(upload_to='images/',null=True,blank=True)
 
     objects = UserManager()
 
@@ -68,7 +68,7 @@ class User(AbstractBaseUser):
     
 
 class Doctors(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='doctors')    
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='doctors')
     department = models.CharField(max_length=100,null=True,blank=True)
     hospital = models.CharField(max_length=100,null=True,blank=True)
     image = models.ImageField(upload_to='images/',null=True,blank=True)

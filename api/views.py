@@ -73,10 +73,11 @@ class DoctorProfile(APIView):
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
         
     def patch(self, request):
-        print(request.data)
+       
         doctor_data = Doctors.objects.get(user = request.user)
         serializer = DocterSerializer(doctor_data, data=request.data, partial=True)
         if serializer.is_valid():
+           
             print(serializer.validated_data,'././././')
             serializer.save()
             
@@ -93,13 +94,10 @@ class UserProfile(APIView):
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def patch(self, request):
-        try:
-            user = User.objects.get(email=request.user.email)
-        except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        user_data = User.objects.get(email = request.user)
+        serializer = UserSerializer(user_data, data=request.data, partial=True)
         if serializer.is_valid():
+            print(serializer.validated_data,'././././')
             serializer.save()
-            return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+            return Response({"Msg": "Profile updated"},status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
