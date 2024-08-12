@@ -2,14 +2,15 @@ from django.shortcuts import HttpResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
-from . serializers import UserRegisterSerializer,MyTokenObtainPairSerializer,UserSerializer,DocterSerializer
+from . serializers import UserRegisterSerializer,MyTokenObtainPairSerializer,UserSerializer,DoctorSerializer
 from . models import User,Doctors
 
 # Create your views here.
 
 class UserRegistration(APIView):
+    permission_classes = [AllowAny]
     def post(self,request):
         serializer = UserRegisterSerializer(data=request.data)
         print(request.data,"tyuio")
@@ -29,7 +30,7 @@ class UserRegistration(APIView):
                     user=user
                 )
             return Response({"message":"Registration Successfully completed"},status=status.HTTP_201_CREATED)
-        return Response({"message":serializer.errors},status=status.HTTP_404_NOT_FOUND)
+        return Response({"message":serializer.errors},status=status.HTTP_400_BAD_REQUEST)
     
 
 class MytokenObtainPairview(TokenObtainPairView):
@@ -44,10 +45,10 @@ class UsersList(APIView):
     
 
 class DoctorList(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self,request):
         obj = Doctors.objects.all()
-        serializer = DocterSerializer(obj,many=True)
+        serializer = DoctorSerializer(obj,many=True)
         return Response(serializer.data)
     
     def patch(self,request):
@@ -61,13 +62,14 @@ class DoctorList(APIView):
     
 class DoctorProfile(APIView):
     def get(self, request):
+        print("get works")
         user = request.user
         if user.is_anonymous:
             return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             obj = Doctors.objects.get(user=user)
             print(obj.department)
-            serializer = DocterSerializer(obj)
+            serializer = DoctorSerializer(obj)
             return Response(serializer.data)
         except Doctors.DoesNotExist:
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -75,7 +77,9 @@ class DoctorProfile(APIView):
     def patch(self, request):
        
         doctor_data = Doctors.objects.get(user = request.user)
-        serializer = DocterSerializer(doctor_data, data=request.data, partial=True)
+        serializer = DoctorSerializer(doctor_data, data=request.data, partial=True)
+        print("patch works")
+        print(request.data)
         if serializer.is_valid():
            
             print(serializer.validated_data,'././././')
