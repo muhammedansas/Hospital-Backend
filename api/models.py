@@ -71,5 +71,4 @@ class Doctors(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='doctors')
     department = models.CharField(max_length=100,null=True,blank=True)
     hospital = models.CharField(max_length=100,null=True,blank=True)
-    image = models.ImageField(upload_to='images/',null=True,blank=True)
     is_verified = models.BooleanField(default=False)

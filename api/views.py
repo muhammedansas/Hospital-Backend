@@ -39,9 +39,19 @@ class MytokenObtainPairview(TokenObtainPairView):
 
 class UsersList(APIView):
     def get(self,request):
-        obj = User.objects.all()
+        obj = User.objects.filter(is_admin=False)
         serializer = UserSerializer(obj,many=True)
         return Response(serializer.data)
+    
+    def patch(self,request,pk=None):
+        print("this is userlist patch",request.data)
+        if pk is not None:
+            user = User.objects.get(pk=pk)
+            serializer = UserSerializer(user,data=request.data,partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+        
     
 
 class DoctorList(APIView):
@@ -51,41 +61,35 @@ class DoctorList(APIView):
         serializer = DoctorSerializer(obj,many=True)
         return Response(serializer.data)
     
-    def patch(self,request):
-        user = request.user
+    def patch(self, request, pk=None):
         data = request.data
-        serializer = UserSerializer(user,data=data,partial = True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"Msg":"Profile updated"},serializer.data,status=status.HTTP_200_OK)
-        return Response(serializer.errors,status=status.HTTP_502_BAD_GATEWAY)
+        if pk is not None:
+            user = Doctors.objects.get(pk=pk)
+            serializer = DoctorSerializer(user, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"Msg": "Profile updated", **serializer.data}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_502_BAD_GATEWAY)
+
     
 class DoctorProfile(APIView):
     def get(self, request):
-        print("get works")
         user = request.user
         if user.is_anonymous:
             return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             obj = Doctors.objects.get(user=user)
-            print(obj.department)
             serializer = DoctorSerializer(obj)
             return Response(serializer.data)
         except Doctors.DoesNotExist:
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
         
     def patch(self, request):
-       
-        doctor_data = Doctors.objects.get(user = request.user)
+        doctor_data = Doctors.objects.get(user=request.user)
         serializer = DoctorSerializer(doctor_data, data=request.data, partial=True)
-        print("patch works")
-        print(request.data)
         if serializer.is_valid():
-           
-            print(serializer.validated_data,'././././')
             serializer.save()
-            
-            return Response({"Msg": "Profile updated"},status=status.HTTP_200_OK)
+            return Response({"Msg": "Profile updated"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfile(APIView):
@@ -101,7 +105,6 @@ class UserProfile(APIView):
         user_data = User.objects.get(email = request.user)
         serializer = UserSerializer(user_data, data=request.data, partial=True)
         if serializer.is_valid():
-            print(serializer.validated_data,'././././')
             serializer.save()
             return Response({"Msg": "Profile updated"},status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
