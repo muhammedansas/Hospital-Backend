@@ -104,7 +104,7 @@ class DoctorSerializer(serializers.ModelSerializer):
             if 'profile_image' in user_data:
                 user.profile_image = user_data['profile_image']
             user.save()
-
+            
         # Update Doctor fields
         instance.department = validated_data.get('department', instance.department)
         instance.hospital = validated_data.get('hospital', instance.hospital)
