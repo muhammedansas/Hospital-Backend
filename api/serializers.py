@@ -94,7 +94,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
-
+ 
         # Handle nested user data
         if user_data:
             user = instance.user
